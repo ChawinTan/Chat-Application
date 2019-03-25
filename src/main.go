@@ -17,6 +17,15 @@ var broadcast = make(chan Message) // queue for messages sent by clients -> Mess
 
 var upgrader = websocket.Upgrader{} // upgrade http request to a websocket
 
-func main() {
+func handleConnections(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func main() {
+	// temp file server
+	fs := http.FileServer(http.Dir("../public"))
+	http.Handle("/", fs)
+
+	// configure websocket route
+	http.HandleFunc("/ws", handleConnections)
 }
