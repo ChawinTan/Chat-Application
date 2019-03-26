@@ -28,4 +28,17 @@ func main() {
 
 	// configure websocket route
 	http.HandleFunc("/ws", handleConnections)
+
+	// concurrent process that takes messages from broadcast channel
+	go handleMessages()
+
+	log.Println("http server started on:8000")
+	err := http.ListenAndServe(":8000", nil) // uses DefaultServeMux
+
+	if err !=  nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
+
+// if handler is implemented as a type with ServeHttp method, use Handle.
+// if handler is implemented as a function, use Handlefunc
