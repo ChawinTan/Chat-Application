@@ -18,7 +18,16 @@ var broadcast = make(chan Message) // queue for messages sent by clients -> Mess
 var upgrader = websocket.Upgrader{} // upgrade http request to a websocket
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
+	// upgrade websocket
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// close websocket when function returns
+	defer ws.Close()
 
+	// register new client
+	clients[ws] = true
 }
 
 func main() {
