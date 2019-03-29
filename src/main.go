@@ -28,6 +28,19 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 
 	// register new client
 	clients[ws] = true
+
+	// end message to channel if message is correct
+	for {
+		var msg Message
+		err := ws.ReadJSON(&msg)
+
+		if err != nil {
+			log.Printf("err: %v", err)
+			delete(clients, ws)
+			break
+		}
+		broadcast <- msg
+	}
 }
 
 func main() {
