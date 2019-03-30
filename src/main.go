@@ -43,6 +43,23 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleMessages() {
+	for  {
+		// grab the next message
+		msg := broadcast
+		// send it out to every client currently connected
+		for client := range clients {
+			err := client.WriteJSON(msg)
+			if err != nil {
+				// close connection and remove clients from the map
+				log.Printf("Error: %v", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
+	}
+}
+
 func main() {
 	// temp file server
 	fs := http.FileServer(http.Dir("../public"))
