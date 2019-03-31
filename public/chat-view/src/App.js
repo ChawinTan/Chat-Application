@@ -10,15 +10,40 @@ class App extends Component {
     this.state = {
       newMsg: '',
       chatContent: '',
-      email: '',
-      usermae: '',
+      username: '',
       joined: false
     }
     this.onJoin = this.onJoin.bind(this);
+    this.onChangeUserName = this.onChangeUserName.bind(this);
+  }
+
+  componentWillMount() {
+    this.ws = new WebSocket('ws://localhost:8000/ws');
+    this.ws.addEventListener('message', e => {
+      let msg = json.parse(e.data);
+      this.setState(prevState => {
+        return {
+          chatContent: prevState.chatContent + `
+            <div class="chip">
+              <span class="username">${msg.username}</span>
+              <span class="message">${msg.message}</span>
+            </div>
+          `
+        }
+      })
+    })
   }
 
   onJoin() {
-    this.setState({ joined: true });
+    if (this.state.username) {
+      this.setState({ joined: true });
+    } else {
+      alert('Please enter username');
+    }
+  }
+
+  onChangeUserName(e) {
+    this.setState({ username: e.target.value });
   }
 
   render() {
@@ -35,13 +60,13 @@ class App extends Component {
         <div className="fields">
         { !this.state.joined ?
           <div>
-            <input className="username" />
+            <input onChange={this.onChangeUserName} className="username" />
             <button onClick={this.onJoin}>Enter Chat!</button>
           </div>
           :
           <div>
-            <input className="new-message" />
-            <button onClick={this.onJoin}>Send!</button>
+            <input className="new-message" value="" placeholder="Start chatting!"/>
+            <button>Send!</button>
           </div>
         }
         </div>

@@ -62,8 +62,8 @@ func handleMessages() {
 
 func main() {
 	// temp file server
-	fs := http.FileServer(http.Dir("../public"))
-	http.Handle("/", fs)
+	// fs := http.FileServer(http.Dir("../public"))
+	// http.Handle("/", fs)
 
 	// configure websocket route
 	http.HandleFunc("/ws", handleConnections)
