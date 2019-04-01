@@ -7,6 +7,7 @@
 }
 .chatbody {
   margin: 1rem auto 0 auto;
+  padding: 20px;
   width: 80%;
   height: 600px;
   overflow: auto;

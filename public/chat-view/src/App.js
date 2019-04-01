@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import './App.css';
+import ChatContent from '../src/ChatContent/ChatContent';
 
 class App extends Component {
   constructor(props) {
@@ -9,29 +10,29 @@ class App extends Component {
     this.ws = null;
     this.state = {
       newMsg: '',
-      chatContent: '',
+      chatContent: [],
       username: '',
       joined: false
     }
     this.onJoin = this.onJoin.bind(this);
+    this.onSend = this.onSend.bind(this);
+    this.onMessage = this.onMessage.bind(this);
     this.onChangeUserName = this.onChangeUserName.bind(this);
   }
 
   componentWillMount() {
     this.ws = new WebSocket('ws://localhost:8000/ws');
     this.ws.addEventListener('message', e => {
-      let msg = json.parse(e.data);
-      this.setState(prevState => {
-        return {
-          chatContent: prevState.chatContent + `
-            <div class="chip">
-              <span class="username">${msg.username}</span>
-              <span class="message">${msg.message}</span>
-            </div>
-          `
-        }
-      })
-    })
+      if (e.data !== "") {
+        console.log(e.data);
+        let msg = JSON.parse(e.data);
+        this.setState(prevState => {
+          return {
+            chatContent: [... prevState.chatContent, { username: msg.username, message: msg.message }]
+          }
+        });
+      }
+    });
   }
 
   onJoin() {
@@ -42,8 +43,26 @@ class App extends Component {
     }
   }
 
+  onMessage(e) {
+    this.setState({ newMsg: e.target.value });
+  }
+
   onChangeUserName(e) {
     this.setState({ username: e.target.value });
+  }
+
+  onSend() {
+    if (this.state.newMsg !== '') {
+      this.ws.send(
+        JSON.stringify({
+          email: this.state.email,
+          username: this.state.username,
+          message: this.state.newMsg
+        })
+      );
+
+      this.setState({ newMsg: '' });
+    }
   }
 
   render() {
@@ -53,10 +72,16 @@ class App extends Component {
           <h2>Simple Chat App</h2>
         </div>
 
-        <div className="chatbody">
-          
-        </div>
-
+        { this.state.joined ?
+          <div className="chatbody">
+            {
+              this.state.chatContent.map((message, index) => {
+                return <ChatContent key={index} username={message.username} message={message.message} />
+              })
+            }
+          </div> :
+          null
+        }
         <div className="fields">
         { !this.state.joined ?
           <div>
@@ -65,8 +90,8 @@ class App extends Component {
           </div>
           :
           <div>
-            <input className="new-message" value="" placeholder="Start chatting!"/>
-            <button>Send!</button>
+            <input className="new-message"  onChange={this.onMessage} placeholder="Start chatting!"/>
+            <button onClick={this.onSend}>Send!</button>
           </div>
         }
         </div>

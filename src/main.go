@@ -15,7 +15,11 @@ type Message struct {    // type Message
 var clients = make(map[*websocket.Conn]bool) // connected clients
 var broadcast = make(chan Message) // queue for messages sent by clients -> Message type
 
-var upgrader = websocket.Upgrader{} // upgrade http request to a websocket
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+} // upgrade http request to a websocket
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
 	// upgrade websocket
@@ -35,6 +39,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 		err := ws.ReadJSON(&msg)
 
 		if err != nil {
+			log.Printf("At hanleConnections")
 			log.Printf("err: %v", err)
 			delete(clients, ws)
 			break
@@ -46,12 +51,13 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 func handleMessages() {
 	for  {
 		// grab the next message
-		msg := broadcast
+		msg := <-broadcast
 		// send it out to every client currently connected
 		for client := range clients {
 			err := client.WriteJSON(msg)
 			if err != nil {
 				// close connection and remove clients from the map
+				log.Printf("At handleMessages")
 				log.Printf("Error: %v", err)
 				client.Close()
 				delete(clients, client)
@@ -62,7 +68,7 @@ func handleMessages() {
 
 func main() {
 	// temp file server
-	// fs := http.FileServer(http.Dir("../public"))
+	// fs := http.FileServer(http.Dir("../public/chat-view"))
 	// http.Handle("/", fs)
 
 	// configure websocket route
