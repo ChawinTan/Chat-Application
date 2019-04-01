@@ -24,7 +24,6 @@ class App extends Component {
     this.ws = new WebSocket('ws://localhost:8000/ws');
     this.ws.addEventListener('message', e => {
       if (e.data !== "") {
-        console.log(e.data);
         let msg = JSON.parse(e.data);
         this.setState(prevState => {
           return {

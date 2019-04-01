@@ -67,9 +67,6 @@ func handleMessages() {
 }
 
 func main() {
-	// temp file server
-	// fs := http.FileServer(http.Dir("../public/chat-view"))
-	// http.Handle("/", fs)
 
 	// configure websocket route
 	http.HandleFunc("/ws", handleConnections)
